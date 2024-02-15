@@ -1,0 +1,26 @@
+{
+  "name": "lsxpath",
+  "version": "1.0.1",
+  "description": "list xpath recursive with simple filter",
+  "main": "index.js",
+  "scripts": {
+    "make": "tsc"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/r22n/lsxpath.git"
+  },
+  "author": "r22n",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/r22n/lsxpath/issues"
+  },
+  "homepage": "https://github.com/r22n/lsxpath#readme",
+  "devDependencies": {
+    "@types/node": "^20.11.19",
+    "typescript": "^4.9.5"
+  },
+  "dependencies": {
+    "xml-js": "^1.6.11"
+  }
+}
