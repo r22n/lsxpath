@@ -4,7 +4,8 @@
   "description": "list xpath recursive with simple filter",
   "main": "index.js",
   "scripts": {
-    "make": "tsc"
+    "make": "tsc",
+    "test": "tsc && jest"
   },
   "repository": {
     "type": "git",
@@ -17,7 +18,9 @@
   },
   "homepage": "https://github.com/r22n/lsxpath#readme",
   "devDependencies": {
+    "@types/jest": "^29.5.12",
     "@types/node": "^20.11.19",
+    "ts-jest": "^29.1.2",
     "typescript": "^4.9.5"
   },
   "dependencies": {

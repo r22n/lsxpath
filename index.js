@@ -44,7 +44,7 @@ function container(cursor, cursors, opt) {
                 // e.g. path[@id="hoge"], path[@id="hoge"]/el
                 let next = `${opt.lbrace}${opt.at}${id.spec}${opt.eq}"${id.id}"${opt.rbrace}`;
                 if (!(el === '_attributes' || el === '_text' || el === '_cdata')) {
-                    next = `${next}/${el}`;
+                    next = `${next}${opt.sep}${el}`;
                 }
                 cursors.push({
                     xpath: `${xpath}${next}`,
@@ -56,10 +56,20 @@ function container(cursor, cursors, opt) {
         else {
             Object.entries(see).forEach(([el, x]) => {
                 // e.g. path/@id, path/id
-                const next = `${opt.sep}${inattr ? opt.at : ''}${el}`;
+                let next;
+                if (inattr) {
+                    next = `${opt.sep}${opt.at}${el}`;
+                }
+                else if (!(el === '_attributes' || el === '_text' || el === '_cdata')) {
+                    next = `${opt.sep}${el}`;
+                }
+                else {
+                    next = '';
+                }
                 cursors.push({
                     xpath: `${xpath}${next}`,
                     see: x,
+                    inattr: el === '_attributes',
                 });
             });
         }

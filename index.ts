@@ -34,7 +34,7 @@ export type Opt = {
     lbrace?: string;
     rbrace?: string;
     eq?: string;
-    filterspec?:string[];
+    filterspec?: string[];
 }
 
 const defopt: Opt = {
@@ -43,7 +43,7 @@ const defopt: Opt = {
     lbrace: '[',
     rbrace: ']',
     eq: '=',
-    filterspec:['id','key','name']
+    filterspec: ['id', 'key', 'name']
 };
 
 function container(cursor: Cursor, cursors: Cursor[], opt: Opt) {
@@ -64,7 +64,7 @@ function container(cursor: Cursor, cursors: Cursor[], opt: Opt) {
                 // e.g. path[@id="hoge"], path[@id="hoge"]/el
                 let next = `${opt.lbrace}${opt.at}${id.spec}${opt.eq}"${id.id}"${opt.rbrace}`;
                 if (!(el === '_attributes' || el === '_text' || el === '_cdata')) {
-                    next = `${next}/${el}`
+                    next = `${next}${opt.sep}${el}`
                 }
 
                 cursors.push({
@@ -76,10 +76,19 @@ function container(cursor: Cursor, cursors: Cursor[], opt: Opt) {
         } else {
             Object.entries(see!).forEach(([el, x]) => {
                 // e.g. path/@id, path/id
-                const next = `${opt.sep}${inattr ? opt.at : ''}${el}`
+                let next;
+                if (inattr) {
+                    next = `${opt.sep}${opt.at}${el}`
+                } else if (!(el === '_attributes' || el === '_text' || el === '_cdata')) {
+                    next = `${opt.sep}${el}`;
+                } else {
+                    next = '';
+                }
+
                 cursors.push({
                     xpath: `${xpath}${next}`,
                     see: x,
+                    inattr: el === '_attributes',
                 });
             });
         }
@@ -87,21 +96,21 @@ function container(cursor: Cursor, cursors: Cursor[], opt: Opt) {
     }
 }
 
-function keybind(xml: unknown, opt:Opt ) {
+function keybind(xml: unknown, opt: Opt) {
     const a = ary(xml);
-    return a.every(x=> aid(x, opt ));
+    return a.every(x => aid(x, opt));
 }
 
 
-export function aid(xml: any,opt:Opt): ID | undefined {
+export function aid(xml: any, opt: Opt): ID | undefined {
     const a = xml._attributes;
-    if (!(a && opt.filterspec?.some(spec=>a[spec]))) {
+    if (!(a && opt.filterspec?.some(spec => a[spec]))) {
         return;
     }
 
-    const spec = opt.filterspec.find(spec=>a[spec])!;
+    const spec = opt.filterspec.find(spec => a[spec])!;
     const id = a[spec];
-    return {spec,id};
+    return { spec, id };
 
 }
 
