@@ -68,10 +68,13 @@ function container(cursor, cursors, opt) {
 }
 function keybind(xml, opt) {
     const a = xml._attributes;
-    if (!(a && opt.filterspec?.some(spec => a[spec]))) {
+    if (!a) {
         return;
     }
-    const spec = opt.filterspec.find(spec => a[spec]);
+    const spec = opt.filterspec?.find(spec => a[spec]);
+    if (!spec) {
+        return;
+    }
     const id = a[spec];
     return { spec, id };
 }
