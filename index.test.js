@@ -42,6 +42,12 @@ hello!
             { value: 'test', xpath: '/sample/test[#key="test"]/#key' },
         ]);
         expect((0, _1.lsxpath)('<sample><test key="test">hoge</test></sample>', {
+            quot: '#',
+        })).toEqual([
+            { value: 'hoge', xpath: '/sample/test[@key=#test#]' },
+            { value: 'test', xpath: '/sample/test[@key=#test#]/@key' },
+        ]);
+        expect((0, _1.lsxpath)('<sample><test key="test">hoge</test></sample>', {
             eq: '#'
         })).toEqual([
             { value: 'hoge', xpath: '/sample/test[@key#"test"]' },

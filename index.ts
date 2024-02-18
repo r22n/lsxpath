@@ -34,6 +34,7 @@ export type Opt = {
     lbrace?: string;
     rbrace?: string;
     eq?: string;
+    quot?: string;
     filterspec?: string[];
 }
 
@@ -43,6 +44,7 @@ const defopt: Opt = {
     lbrace: '[',
     rbrace: ']',
     eq: '=',
+    quot: '"',
     filterspec: ['id', 'key', 'name']
 };
 
@@ -57,52 +59,39 @@ function container(cursor: Cursor, cursors: Cursor[], opt: Opt) {
         });
         return true;
     } else if (typeof see === 'object') {
-        if (keybind(see, opt)) {
-            const id = aid(see, opt)!;
-            Object.entries(see!).forEach(([el, x]) => {
 
-                // e.g. path[@id="hoge"], path[@id="hoge"]/el
-                let next = `${opt.lbrace}${opt.at}${id.spec}${opt.eq}"${id.id}"${opt.rbrace}`;
-                if (!(el === '_attributes' || el === '_text' || el === '_cdata')) {
-                    next = `${next}${opt.sep}${el}`
-                }
+        // /path/to/el
+        let cwp = xpath;
 
-                cursors.push({
-                    xpath: `${xpath}${next}`,
-                    see: x,
-                    inattr: el === '_attributes',
-                });
-            });
-        } else {
-            Object.entries(see!).forEach(([el, x]) => {
-                // e.g. path/@id, path/id
-                let next;
-                if (inattr) {
-                    next = `${opt.sep}${opt.at}${el}`
-                } else if (!(el === '_attributes' || el === '_text' || el === '_cdata')) {
-                    next = `${opt.sep}${el}`;
-                } else {
-                    next = '';
-                }
-
-                cursors.push({
-                    xpath: `${xpath}${next}`,
-                    see: x,
-                    inattr: el === '_attributes',
-                });
-            });
+        // /path/to/el[@spec="id"]
+        const filter = keybind(see, opt);
+        if (filter) {
+            cwp = `${cwp}${opt.lbrace}${opt.at}${filter.spec}${opt.eq}${opt.quot}${filter.id}${opt.quot}${opt.rbrace}`
         }
+
+        Object.entries(see!).forEach(([el, x]) => {
+            let next = cwp;
+            if (inattr) {
+                // /path/to/el/@attr
+                next = `${next}${opt.sep}${opt.at}${el}`;
+            } else if (!(el === '_attributes' || el === '_text' || el === '_cdata')) {
+                // dump 'el' into xpath if 'el' was container
+                // /path/to/el/child
+                next = `${next}${opt.sep}${el}`;
+            }
+
+            cursors.push({
+                see: x,
+                xpath: next,
+                inattr: el === '_attributes',
+            });
+        });
+
         return true;
     }
 }
 
-function keybind(xml: unknown, opt: Opt) {
-    const a = ary(xml);
-    return a.every(x => aid(x, opt));
-}
-
-
-export function aid(xml: any, opt: Opt): ID | undefined {
+function keybind(xml: any, opt: Opt): ID | undefined {
     const a = xml._attributes;
     if (!(a && opt.filterspec?.some(spec => a[spec]))) {
         return;
@@ -111,21 +100,10 @@ export function aid(xml: any, opt: Opt): ID | undefined {
     const spec = opt.filterspec.find(spec => a[spec])!;
     const id = a[spec];
     return { spec, id };
-
 }
 
 type ID = {
     id: string;
     spec: string;
 }
-
-
-function ary(x: unknown) {
-    if (Array.isArray(x)) {
-        return x;
-    } else {
-        return [x];
-    }
-}
-
 
