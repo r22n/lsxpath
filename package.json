@@ -1,11 +1,11 @@
 {
   "name": "lsxpath",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "list xpath recursive with simple filter",
   "main": "index.js",
   "scripts": {
-    "make": "tsc",
-    "test": "tsc && jest"
+    "make": "tsc index.ts",
+    "test": "jest"
   },
   "repository": {
     "type": "git",
