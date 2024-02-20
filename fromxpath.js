@@ -144,8 +144,18 @@ function split(xpath, opt) {
     var sep = [0];
     for (var i = 1, end = xpath.length, quot = false; i < end; i++) {
         var c = xpath.charAt(i);
-        if (c === opt.quot) {
-            quot != quot;
+        var n = xpath.substring(i, i + opt.quot.length + opt.rbrace.length);
+        if (n === "".concat(opt.quot).concat(opt.rbrace)) {
+            // /path/to/container[@spec="id"]/@attr
+            //                             ^ '"]' shows quiting quot
+            quot = false;
+            i += opt.quot.length + opt.rbrace.length - 1;
+        }
+        else if (c === opt.quot) {
+            // /path/to/container[@spec="id"]/@attr
+            //                          ^ '"' shows starting quot
+            quot = true;
+            i += opt.quot.length - 1;
         }
         else if (!quot && c === opt.sep) {
             sep.push(i);

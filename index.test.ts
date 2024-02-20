@@ -178,6 +178,22 @@ hello!
             { value: 'b', xpath: '/sample/w'},
             { value: 'comment', xpath: '/sample/w/_comment'},
         ])).toEqual('<sample><w a="B">b<!--comment--></w></sample>');
+
+        expect(fromxpath([
+            { value: 'B', xpath: '/sample/w/@a'},
+        ])).toEqual('<sample><w a="B"/></sample>');
+
+        expect(fromxpath([
+            { value: 'B', xpath: '/sample/w[@a="B"]/@a'},
+        ])).toEqual('<sample><w a="B"/></sample>');
+
+        expect(fromxpath([
+            { value: 'A/B', xpath: '/sample/w[@a="A/B"]/@a'},
+        ])).toEqual('<sample><w a="A/B"/></sample>');
+
+        expect(fromxpath([
+            { value: '<>="!--/', xpath: '/sample/w[@a="<>="!--/"]/@a'},
+        ])).toEqual('<sample><w a="<>=&quot;!--/"/></sample>');
     });
 
     it('complex structures of xpath', () => {

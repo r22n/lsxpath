@@ -151,8 +151,18 @@ function split(xpath: string, opt: Opt) {
     const sep = [0];
     for (let i = 1, end = xpath.length, quot = false; i < end; i++) {
         const c = xpath.charAt(i);
-        if (c === opt.quot) {
-            quot != quot;
+        const n = xpath.substring(i, i + opt.quot!.length + opt.rbrace!.length);
+
+        if (n === `${opt.quot}${opt.rbrace}`) {
+            // /path/to/container[@spec="id"]/@attr
+            //                             ^ '"]' shows quiting quot
+            quot = false;
+            i += opt.quot!.length + opt.rbrace!.length - 1;
+        } else if (c === opt.quot) {
+            // /path/to/container[@spec="id"]/@attr
+            //                          ^ '"' shows starting quot
+            quot = true;
+            i += opt.quot!.length - 1;
         } else if (!quot && c === opt.sep) {
             sep.push(i);
         }
