@@ -75,7 +75,7 @@ function keybind(xml: ElementCompact, opt: Opt): ID | undefined {
         return;
     }
 
-    const spec = opt.filterspec?.find(spec => a[spec]);
+    const spec = opt.filterspec?.find(spec => a[spec] != null);
     if (!spec) {
         return;
     }

@@ -76,7 +76,7 @@ function keybind(xml, opt) {
     if (!a) {
         return;
     }
-    var spec = (_a = opt.filterspec) === null || _a === void 0 ? void 0 : _a.find(function (spec) { return a[spec]; });
+    var spec = (_a = opt.filterspec) === null || _a === void 0 ? void 0 : _a.find(function (spec) { return a[spec] != null; });
     if (!spec) {
         return;
     }

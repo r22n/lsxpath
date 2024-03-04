@@ -37,7 +37,22 @@ hello!
             { value: 'bob', xpath: '/sample[@name="bob"]/@name' },
         ])
     });
-    
+
+    it('keybind el shows simple filter even empty key', () => {
+        expect(lsxpath('<sample><el id=""/></sample>')).toEqual([
+            { value: '', xpath: '/sample/el[@id=""]/@id'},
+        ]);
+
+        expect(lsxpath('<sample><el id="w"/><el id=""/></sample>')).toEqual([
+            { value: '', xpath: '/sample/el[@id=""]/@id'},
+            { value: 'w', xpath: '/sample/el[@id="w"]/@id'},
+        ]);
+
+        expect(lsxpath('<sample><el id=""><a key=""/></el></sample>')).toEqual([
+            { value: '', xpath: '/sample/el[@id=""]/a[@key=""]/@key'},
+            { value: '', xpath: '/sample/el[@id=""]/@id'},
+        ]);
+    });
 
     it('tests options', () => {
         expect(lsxpath('<sample><test key="test">hoge</test></sample>', {
@@ -219,8 +234,12 @@ hello!
         // same notations
         let xml = '<sample>hoge</sample>';
         expect(fromxpath(lsxpath(xml))).toEqual(xml);
-        xml = '<path><to attr="DDD"><very><complex thatis="complex"><value w="A"/></complex></very></to></path>'
+        xml = '<path><to attr="DDD"><very><complex thatis="complex"><value w="A"/></complex></very></to></path>';
         expect(fromxpath(lsxpath(xml))).toEqual(xml);
-        
+        xml = '<sample><el id=""><a key=""/></el></sample>';
+        expect(fromxpath(lsxpath(xml))).toEqual(xml);
+        xml = '<sample><el id=""><a key=""/><a key="2"/></el><el id="1"><a key=""/><a key="2"/></el></sample>';
+        expect(fromxpath(lsxpath(xml))).toEqual(xml);
+
     });
 });
