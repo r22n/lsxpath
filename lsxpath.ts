@@ -2,6 +2,10 @@ import { ElementCompact, xml2json } from "xml-js";
 import { defopt, Opt, XPath } from ".";
 
 export function lsxpath(xml: string, opt?: Opt) {
+    if (!xml.trim()) {
+        return [];
+    }
+
     opt = { ...defopt, ...opt };
 
     const cursors: Cursor[] = [{ xpath: '', see: JSON.parse(xml2json(xml, { compact: true })) }];
@@ -21,7 +25,7 @@ export function lsxpath(xml: string, opt?: Opt) {
 
 type Cursor = {
     xpath: string;
-    see: ElementCompact;
+    see: ElementCompact | string | number | boolean;
     inattr?: boolean;
 }
 
@@ -47,23 +51,33 @@ function container(cursor: Cursor, cursors: Cursor[], opt: Opt) {
             cwp = `${cwp}${opt.lbrace}${opt.at}${filter.spec}${opt.eq}${opt.quot}${filter.id}${opt.quot}${opt.rbrace}`;
         }
 
-        Object.entries(see!).forEach(([el, x]) => {
-            let next = cwp;
-            if (inattr) {
-                // /path/to/el/@attr
-                next = `${next}${opt.sep}${opt.at}${el}`;
-            } else if (!(el === '_attributes' || el === '_text' || el === '_cdata')) {
-                // dump 'el' into xpath if 'el' was container
-                // /path/to/el/child
-                next = `${next}${opt.sep}${el}`;
-            }
+        const children = Object.entries(see!);
+        if (children.length) {
+            children.forEach(([el, x]) => {
+                let next = cwp;
+                if (inattr) {
+                    // /path/to/el/@attr
+                    next = `${next}${opt.sep}${opt.at}${el}`;
+                } else if (!(el === '_attributes' || el === '_text' || el === '_cdata')) {
+                    // dump 'el' into xpath if 'el' was container
+                    // /path/to/el/child
+                    next = `${next}${opt.sep}${el}`;
+                }
 
-            cursors.push({
-                see: x,
-                xpath: next,
-                inattr: el === '_attributes',
+                cursors.push({
+                    see: x,
+                    xpath: next,
+                    inattr: el === '_attributes',
+                });
             });
-        });
+        } else {
+            // dump empty xpath for such as '<a/>' '<a></a>'
+            cursors.push({
+                see: '',
+                xpath: cwp
+            });
+        }
+
 
         return true;
     }

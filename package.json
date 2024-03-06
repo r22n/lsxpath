@@ -1,6 +1,6 @@
 {
   "name": "lsxpath",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "list xpath recursive with simple filter",
   "main": "index.js",
   "scripts": {

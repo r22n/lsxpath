@@ -4,10 +4,15 @@ import { fromxpath, lsxpath } from ".";
 describe('test', () => {
     it('empty xml shows empty list', () => {
         expect(lsxpath('').length).toEqual(0);
-        expect(lsxpath('<sample/>').length).toEqual(0);
     });
 
     it('text shows single path to text', () => {
+        expect(lsxpath('<sample/>')).toEqual([
+            { value: '', xpath: '/sample' },
+        ]);
+        expect(lsxpath('<sample></sample>')).toEqual([
+            { value: '', xpath: '/sample' },
+        ]);
         expect(lsxpath('<sample>text</sample>')).toEqual([
             { value: 'text', xpath: '/sample' },
         ]);
@@ -230,6 +235,11 @@ hello!
 
         expect(fromxpath(lsxpath('<sample><hoge a="B"/></sample>'))).toEqual('<sample><hoge a="B"/></sample>');
         expect(fromxpath(lsxpath('<sample><hoge a="B"></hoge></sample>'))).toEqual('<sample><hoge a="B"/></sample>');
+
+        expect(fromxpath(lsxpath('<sample/>'))).toEqual('<sample></sample>');
+        expect(fromxpath(lsxpath('<sample></sample>'))).toEqual('<sample></sample>');
+        expect(fromxpath(lsxpath('<sample><a/></sample>'))).toEqual('<sample><a></a></sample>');
+        expect(fromxpath(lsxpath('<sample><a></a></sample>'))).toEqual('<sample><a></a></sample>');
 
         // same notations
         let xml = '<sample>hoge</sample>';
