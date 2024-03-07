@@ -1,5 +1,7 @@
 import { lsxpath } from './lsxpath';
 import { fromxpath } from './fromxpath';
+import { Varcom } from 'varcom.js';
+
 
 export {
     lsxpath,
@@ -29,4 +31,8 @@ export type Opt = {
     eq?: string;
     quot?: string;
     filterspec?: string[];
+    autofilter?: {
+        spec: string;
+        id: Varcom;
+    };
 }

@@ -2,6 +2,8 @@
 import { ElementCompact, json2xml } from 'xml-js';
 import { defopt, Opt, XPath } from '.';
 
+const escape = require('xml-escape');
+
 export function fromxpath(xpath: XPath[], opt?: Opt) {
     opt = { ...defopt, ...opt };
 
@@ -47,7 +49,7 @@ function xalloc(xpath: XPath[], opt: Opt) {
             // /path/to/el/@at
             //         ^ /el was found by /path/to/el ( cut /@at )
             const current = memo[x.xpath.substring(0, s[s.length - 2])];
-            attr(current, base.substring(opt.at!.length), x.value);
+            attr(current, base.substring(opt.at!.length), escape(x.value));
         } else if (base === '_comment') {
             // /path/to/el/_comment
             //         ^ /el was found by /path/to/el ( cut /_comment )

@@ -1,5 +1,5 @@
 import { fromxpath, lsxpath } from ".";
-
+import { compile } from 'varcom.js';
 
 describe('test', () => {
     it('empty xml shows empty list', () => {
@@ -45,17 +45,17 @@ hello!
 
     it('keybind el shows simple filter even empty key', () => {
         expect(lsxpath('<sample><el id=""/></sample>')).toEqual([
-            { value: '', xpath: '/sample/el[@id=""]/@id'},
+            { value: '', xpath: '/sample/el[@id=""]/@id' },
         ]);
 
         expect(lsxpath('<sample><el id="w"/><el id=""/></sample>')).toEqual([
-            { value: '', xpath: '/sample/el[@id=""]/@id'},
-            { value: 'w', xpath: '/sample/el[@id="w"]/@id'},
+            { value: '', xpath: '/sample/el[@id=""]/@id' },
+            { value: 'w', xpath: '/sample/el[@id="w"]/@id' },
         ]);
 
         expect(lsxpath('<sample><el id=""><a key=""/></el></sample>')).toEqual([
-            { value: '', xpath: '/sample/el[@id=""]/a[@key=""]/@key'},
-            { value: '', xpath: '/sample/el[@id=""]/@id'},
+            { value: '', xpath: '/sample/el[@id=""]/a[@key=""]/@key' },
+            { value: '', xpath: '/sample/el[@id=""]/@id' },
         ]);
     });
 
@@ -63,167 +63,196 @@ hello!
         expect(lsxpath('<sample><test key="test">hoge</test></sample>', {
             at: '#'
         })).toEqual([
-            { value: 'hoge', xpath: '/sample/test[#key="test"]'},
-            { value: 'test', xpath: '/sample/test[#key="test"]/#key'},
+            { value: 'hoge', xpath: '/sample/test[#key="test"]' },
+            { value: 'test', xpath: '/sample/test[#key="test"]/#key' },
         ]);
 
         expect(lsxpath('<sample><test key="test">hoge</test></sample>', {
             quot: '#',
         })).toEqual([
-            { value: 'hoge', xpath: '/sample/test[@key=#test#]'},
-            { value: 'test', xpath: '/sample/test[@key=#test#]/@key'},
+            { value: 'hoge', xpath: '/sample/test[@key=#test#]' },
+            { value: 'test', xpath: '/sample/test[@key=#test#]/@key' },
         ]);
 
         expect(lsxpath('<sample><test key="test">hoge</test></sample>', {
             eq: '#'
         })).toEqual([
-            { value: 'hoge', xpath: '/sample/test[@key#"test"]'},
-            { value: 'test', xpath: '/sample/test[@key#"test"]/@key'},
+            { value: 'hoge', xpath: '/sample/test[@key#"test"]' },
+            { value: 'test', xpath: '/sample/test[@key#"test"]/@key' },
         ]);
 
         expect(lsxpath('<sample><test key="test0">hoge</test><test key="test1">fuga</test></sample>', {
             filterspec: [],
         })).toEqual([
-            { value: 'fuga', xpath: '/sample/test'},
-            { value: 'test1', xpath: '/sample/test/@key'},
-            { value: 'hoge', xpath: '/sample/test'},
-            { value: 'test0', xpath: '/sample/test/@key'},
+            { value: 'fuga', xpath: '/sample/test' },
+            { value: 'test1', xpath: '/sample/test/@key' },
+            { value: 'hoge', xpath: '/sample/test' },
+            { value: 'test0', xpath: '/sample/test/@key' },
         ]);
 
         expect(lsxpath('<sample><test key="test">hoge</test></sample>', {
             filterspec: void 0,
         })).toEqual([
-            { value: 'hoge', xpath: '/sample/test'},
-            { value: 'test', xpath: '/sample/test/@key'},
+            { value: 'hoge', xpath: '/sample/test' },
+            { value: 'test', xpath: '/sample/test/@key' },
         ]);
 
         expect(lsxpath('<sample><test myfilterspec="test" key="aaa">hoge</test></sample>', {
             filterspec: ['myfilterspec'],
         })).toEqual([
-            { value: 'hoge', xpath: '/sample/test[@myfilterspec="test"]'},
-            { value: 'aaa', xpath: '/sample/test[@myfilterspec="test"]/@key'},
-            { value: 'test', xpath: '/sample/test[@myfilterspec="test"]/@myfilterspec'},
+            { value: 'hoge', xpath: '/sample/test[@myfilterspec="test"]' },
+            { value: 'aaa', xpath: '/sample/test[@myfilterspec="test"]/@key' },
+            { value: 'test', xpath: '/sample/test[@myfilterspec="test"]/@myfilterspec' },
         ]);
 
         expect(lsxpath('<sample><test key="test">hoge</test></sample>', {
             lbrace: '<',
             rbrace: '>',
         })).toEqual([
-            { value: 'hoge', xpath: '/sample/test<@key="test">'},
-            { value: 'test', xpath: '/sample/test<@key="test">/@key'},
+            { value: 'hoge', xpath: '/sample/test<@key="test">' },
+            { value: 'test', xpath: '/sample/test<@key="test">/@key' },
         ]);
 
         expect(lsxpath('<sample><test key="test">hoge</test></sample>', {
             sep: '#'
         })).toEqual([
-            { value: 'hoge', xpath: '#sample#test[@key="test"]'},
-            { value: 'test', xpath: '#sample#test[@key="test"]#@key'},
+            { value: 'hoge', xpath: '#sample#test[@key="test"]' },
+            { value: 'test', xpath: '#sample#test[@key="test"]#@key' },
+        ]);
+
+        expect(lsxpath('<list><li>1st</li><li>2nd</li><li>3rd</li><li key="a">4th</li></list>', {
+            autofilter: {
+                spec: 'id',
+                id: compile('id${index}'),
+            }
+        })).toEqual([
+            { value: '4th', xpath: '/list/li[@id="id3"]' },
+            { value: 'id3', xpath: '/list/li[@id="id3"]/@id' },
+            { value: 'a', xpath: '/list/li[@id="id3"]/@key' },
+            { value: 'id2', xpath: '/list/li[@id="id2"]/@id' },
+            { value: '3rd', xpath: '/list/li[@id="id2"]' },
+            { value: 'id1', xpath: '/list/li[@id="id1"]/@id' },
+            { value: '2nd', xpath: '/list/li[@id="id1"]' },
+            { value: 'id0', xpath: '/list/li[@id="id0"]/@id' },
+            { value: '1st', xpath: '/list/li[@id="id0"]' },
         ]);
     });
 
-    it('single value from single entry',()=>{
+    it('single value from single entry', () => {
         expect(fromxpath([
-            { value: 'hoge', xpath: '/sample'},
+            { value: 'hoge', xpath: '/sample' },
         ])).toEqual('<sample>hoge</sample>');
 
         expect(fromxpath([
-            { value: 'a', xpath: '/sample'},
+            { value: 'a', xpath: '/sample' },
         ])).toEqual('<sample>a</sample>');
 
         expect(fromxpath([
-            { value: ' ', xpath: '/sample'},
+            { value: ' ', xpath: '/sample' },
         ])).toEqual('<sample> </sample>');
 
         expect(fromxpath([
-            { value: 'hoge', xpath: '/sample/@attr'},
+            { value: 'hoge', xpath: '/sample/@attr' },
         ])).toEqual('<sample attr="hoge"/>');
 
         expect(fromxpath([
-            { value: 'hoge', xpath: '/sample/@vvv'},
+            { value: 'hoge', xpath: '/sample/@vvv' },
         ])).toEqual('<sample vvv="hoge"/>');
 
         expect(fromxpath([
-            { value: 'a', xpath: '/sample/@vvv'},
+            { value: 'a', xpath: '/sample/@vvv' },
         ])).toEqual('<sample vvv="a"/>');
 
         expect(fromxpath([
-            { value: 'a', xpath: '/sample/_comment'},
+            { value: 'a', xpath: '/sample/_comment' },
         ])).toEqual('<sample><!--a--></sample>');
 
         expect(fromxpath([
-            { value: 'a', xpath: '/sample/hoge/@vvv'},
+            { value: 'a', xpath: '/sample/hoge/@vvv' },
         ])).toEqual('<sample><hoge vvv="a"/></sample>');
 
         expect(fromxpath([
-            { value: 'a', xpath: '/sample/hoge'},
+            { value: 'a', xpath: '/sample/hoge' },
         ])).toEqual('<sample><hoge>a</hoge></sample>');
 
         expect(fromxpath([
-            { value: 'a', xpath: '/sample/_comment'},
+            { value: 'a', xpath: '/sample/_comment' },
         ])).toEqual('<sample><!--a--></sample>');
 
         expect(fromxpath([
-            { value: 'a', xpath: '/sample/hoge/_comment'},
+            { value: 'a', xpath: '/sample/hoge/_comment' },
         ])).toEqual('<sample><hoge><!--a--></hoge></sample>');
     });
 
     it('filter spec do or dont shows container', () => {
         expect(fromxpath([
-            { value: 'A', xpath: '/sample/w[@a="A"]/@a'},
-            { value: 'a', xpath: '/sample/w[@a="A"]'},
-            { value: 'B', xpath: '/sample/w[@a="B"]/@a'},
-            { value: 'b', xpath: '/sample/w[@a="B"]'},
-            { value: 'comment', xpath: '/sample/w[@a="B"]/_comment'},
+            { value: 'A', xpath: '/sample/w[@a="A"]/@a' },
+            { value: 'a', xpath: '/sample/w[@a="A"]' },
+            { value: 'B', xpath: '/sample/w[@a="B"]/@a' },
+            { value: 'b', xpath: '/sample/w[@a="B"]' },
+            { value: 'comment', xpath: '/sample/w[@a="B"]/_comment' },
         ])).toEqual('<sample><w a="A">a</w><w a="B">b<!--comment--></w></sample>');
 
         expect(fromxpath([
-            { value: 'B', xpath: '/sample/w/@a'},
-            { value: 'b', xpath: '/sample/w'},
-            { value: 'comment', xpath: '/sample/w/_comment'},
+            { value: 'B', xpath: '/sample/w/@a' },
+            { value: 'b', xpath: '/sample/w' },
+            { value: 'comment', xpath: '/sample/w/_comment' },
         ])).toEqual('<sample><w a="B">b<!--comment--></w></sample>');
 
         expect(fromxpath([
-            { value: 'A', xpath: '/sample/w[@a="A"]/@a'},
-            { value: 'X', xpath: '/sample/w[@a="A"]/x[@b="X"]/@b'},
-            { value: 'Z', xpath: '/sample/w[@a="A"]/x[@b="X"]'},
-            { value: 'B', xpath: '/sample/w[@a="B"]/@a'},
-            { value: '1', xpath: '/sample/w[@a="B"]/z[@c="1"]/@c'},
-            { value: '2', xpath: '/sample/w[@a="B"]/z[@c="1"]/@d'},
-            { value: '3', xpath: '/sample/w[@a="B"]/z[@c="1"]'},
-            { value: 'comment', xpath: '/sample/w[@a="B"]/_comment'},
+            { value: 'A', xpath: '/sample/w[@a="A"]/@a' },
+            { value: 'X', xpath: '/sample/w[@a="A"]/x[@b="X"]/@b' },
+            { value: 'Z', xpath: '/sample/w[@a="A"]/x[@b="X"]' },
+            { value: 'B', xpath: '/sample/w[@a="B"]/@a' },
+            { value: '1', xpath: '/sample/w[@a="B"]/z[@c="1"]/@c' },
+            { value: '2', xpath: '/sample/w[@a="B"]/z[@c="1"]/@d' },
+            { value: '3', xpath: '/sample/w[@a="B"]/z[@c="1"]' },
+            { value: 'comment', xpath: '/sample/w[@a="B"]/_comment' },
         ])).toEqual('<sample><w a="A"><x b="X">Z</x></w><w a="B"><z c="1" d="2">3</z><!--comment--></w></sample>');
 
         expect(fromxpath([
-            { value: 'B', xpath: '/sample/w/@a'},
-            { value: 'b', xpath: '/sample/w'},
-            { value: 'comment', xpath: '/sample/w/_comment'},
+            { value: 'B', xpath: '/sample/w/@a' },
+            { value: 'b', xpath: '/sample/w' },
+            { value: 'comment', xpath: '/sample/w/_comment' },
         ])).toEqual('<sample><w a="B">b<!--comment--></w></sample>');
 
         expect(fromxpath([
-            { value: 'B', xpath: '/sample/w/@a'},
+            { value: 'B', xpath: '/sample/w/@a' },
         ])).toEqual('<sample><w a="B"/></sample>');
 
         expect(fromxpath([
-            { value: 'B', xpath: '/sample/w[@a="B"]/@a'},
+            { value: 'B', xpath: '/sample/w[@a="B"]/@a' },
         ])).toEqual('<sample><w a="B"/></sample>');
 
         expect(fromxpath([
-            { value: 'A/B', xpath: '/sample/w[@a="A/B"]/@a'},
+            { value: 'A/B', xpath: '/sample/w[@a="A/B"]/@a' },
         ])).toEqual('<sample><w a="A/B"/></sample>');
 
         expect(fromxpath([
-            { value: '<>="!--/', xpath: '/sample/w[@a="<>="!--/"]/@a'},
-        ])).toEqual('<sample><w a="<>=&quot;!--/"/></sample>');
+            { value: '<>="!--/', xpath: '/sample/w[@a="<>="!--/"]/@a' },
+        ])).toEqual('<sample><w a="&lt;&gt;=&quot;!--/"/></sample>');
+
+        expect(fromxpath([
+            { value: '<>="!--/', xpath: '/sample/w' },
+        ])).toEqual('<sample><w>&lt;&gt;="!--/</w></sample>');
     });
 
     it('complex structures of xpath', () => {
         expect(fromxpath([
-            { value: 'A', xpath: '/path/to[@attr="DDD"]/very/complex[@thatis="complex"]/value/@w'},
-            { value: 'DDD', xpath: '/path/to[@attr="DDD"]/@attr'},
-            { value: 'complex', xpath: '/path/to[@attr="DDD"]/very/complex[@thatis="complex"]/@thatis'},
+            { value: 'A', xpath: '/path/to[@attr="DDD"]/very/complex[@thatis="complex"]/value/@w' },
+            { value: 'DDD', xpath: '/path/to[@attr="DDD"]/@attr' },
+            { value: 'complex', xpath: '/path/to[@attr="DDD"]/very/complex[@thatis="complex"]/@thatis' },
         ])).toEqual('<path><to attr="DDD"><very><complex thatis="complex"><value w="A"/></complex></very></to></path>');
-
     });
+
+    it('complex structures of xpath', () => {
+        expect(fromxpath([
+            { value: 'A', xpath: '/path/to[@attr="DDD"]/very/complex[@thatis="complex"]/value/@w' },
+            { value: 'DDD', xpath: '/path/to[@attr="DDD"]/@attr' },
+            { value: 'complex', xpath: '/path/to[@attr="DDD"]/very/complex[@thatis="complex"]/@thatis' },
+        ])).toEqual('<path><to attr="DDD"><very><complex thatis="complex"><value w="A"/></complex></very></to></path>');
+    });
+
 
     it('the xml shows same xml', () => {
         // same meanings

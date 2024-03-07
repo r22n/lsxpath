@@ -14,6 +14,7 @@ exports.__esModule = true;
 exports.fromxpath = void 0;
 var xml_js_1 = require("xml-js");
 var _1 = require(".");
+var escape = require('xml-escape');
 function fromxpath(xpath, opt) {
     opt = __assign(__assign({}, _1.defopt), opt);
     return (0, xml_js_1.json2xml)(JSON.stringify(xalloc(xpath, opt)), { compact: true });
@@ -60,7 +61,7 @@ function xalloc(xpath, opt) {
             // /path/to/el/@at
             //         ^ /el was found by /path/to/el ( cut /@at )
             var current = memo[x.xpath.substring(0, s[s.length - 2])];
-            attr(current, base.substring(opt.at.length), x.value);
+            attr(current, base.substring(opt.at.length), escape(x.value));
         }
         else if (base === '_comment') {
             // /path/to/el/_comment
