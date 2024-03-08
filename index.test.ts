@@ -66,6 +66,12 @@ hello!
             { value: 'hoge', xpath: '/sample/test[#key="test"]' },
             { value: 'test', xpath: '/sample/test[#key="test"]/#key' },
         ]);
+        expect(fromxpath([
+            { value: 'hoge', xpath: '/sample/test[#key="test"]' },
+            { value: 'test', xpath: '/sample/test[#key="test"]/#key' },
+        ], {
+            at: '#'
+        })).toEqual('<sample><test key="test">hoge</test></sample>');
 
         expect(lsxpath('<sample><test key="test">hoge</test></sample>', {
             quot: '#',
@@ -73,6 +79,13 @@ hello!
             { value: 'hoge', xpath: '/sample/test[@key=#test#]' },
             { value: 'test', xpath: '/sample/test[@key=#test#]/@key' },
         ]);
+        expect(fromxpath([
+            { value: 'hoge', xpath: '/sample/test[@key=#test#]' },
+            { value: 'test', xpath: '/sample/test[@key=#test#]/@key' },
+        ], {
+            quot: '#',
+        })).toEqual('<sample><test key="test">hoge</test></sample>');
+
 
         expect(lsxpath('<sample><test key="test">hoge</test></sample>', {
             eq: '#'
@@ -80,6 +93,12 @@ hello!
             { value: 'hoge', xpath: '/sample/test[@key#"test"]' },
             { value: 'test', xpath: '/sample/test[@key#"test"]/@key' },
         ]);
+        expect(fromxpath([
+            { value: 'hoge', xpath: '/sample/test[@key#"test"]' },
+            { value: 'test', xpath: '/sample/test[@key#"test"]/@key' },
+        ], {
+            eq: '#'
+        })).toEqual('<sample><test key="test">hoge</test></sample>');
 
         expect(lsxpath('<sample><test key="test0">hoge</test><test key="test1">fuga</test></sample>', {
             filterspec: [],
@@ -89,6 +108,15 @@ hello!
             { value: 'hoge', xpath: '/sample/test' },
             { value: 'test0', xpath: '/sample/test/@key' },
         ]);
+        expect(fromxpath([
+            { value: 'fuga', xpath: '/sample/test' },
+            { value: 'test1', xpath: '/sample/test/@key' },
+            { value: 'hoge', xpath: '/sample/test' },
+            { value: 'test0', xpath: '/sample/test/@key' },
+        ], {
+            // filterspec will be required if you need to identify element
+            filterspec: [],
+        })).toEqual('<sample><test key=\"test0\">hoge</test></sample>');
 
         expect(lsxpath('<sample><test key="test">hoge</test></sample>', {
             filterspec: void 0,
@@ -96,6 +124,12 @@ hello!
             { value: 'hoge', xpath: '/sample/test' },
             { value: 'test', xpath: '/sample/test/@key' },
         ]);
+        expect(fromxpath([
+            { value: 'hoge', xpath: '/sample/test' },
+            { value: 'test', xpath: '/sample/test/@key' },
+        ], {
+            filterspec: void 0,
+        })).toEqual('<sample><test key="test">hoge</test></sample>');
 
         expect(lsxpath('<sample><test myfilterspec="test" key="aaa">hoge</test></sample>', {
             filterspec: ['myfilterspec'],
@@ -104,6 +138,13 @@ hello!
             { value: 'aaa', xpath: '/sample/test[@myfilterspec="test"]/@key' },
             { value: 'test', xpath: '/sample/test[@myfilterspec="test"]/@myfilterspec' },
         ]);
+        expect(fromxpath([
+            { value: 'hoge', xpath: '/sample/test[@myfilterspec="test"]' },
+            { value: 'aaa', xpath: '/sample/test[@myfilterspec="test"]/@key' },
+            { value: 'test', xpath: '/sample/test[@myfilterspec="test"]/@myfilterspec' },
+        ], {
+            filterspec: ['myfilterspec'],
+        })).toEqual('<sample><test key="aaa" myfilterspec="test">hoge</test></sample>');
 
         expect(lsxpath('<sample><test key="test">hoge</test></sample>', {
             lbrace: '<',
@@ -112,6 +153,13 @@ hello!
             { value: 'hoge', xpath: '/sample/test<@key="test">' },
             { value: 'test', xpath: '/sample/test<@key="test">/@key' },
         ]);
+        expect(fromxpath([
+            { value: 'hoge', xpath: '/sample/test<@key="test">' },
+            { value: 'test', xpath: '/sample/test<@key="test">/@key' },
+        ], {
+            lbrace: '<',
+            rbrace: '>',
+        })).toEqual('<sample><test key="test">hoge</test></sample>');
 
         expect(lsxpath('<sample><test key="test">hoge</test></sample>', {
             sep: '#'
@@ -119,6 +167,12 @@ hello!
             { value: 'hoge', xpath: '#sample#test[@key="test"]' },
             { value: 'test', xpath: '#sample#test[@key="test"]#@key' },
         ]);
+        expect(fromxpath([
+            { value: 'hoge', xpath: '#sample#test[@key="test"]' },
+            { value: 'test', xpath: '#sample#test[@key="test"]#@key' },
+        ], {
+            sep: '#'
+        })).toEqual('<sample><test key="test">hoge</test></sample>');
 
         expect(lsxpath('<list><li>1st</li><li>2nd</li><li>3rd</li><li key="a">4th</li></list>', {
             autofilter: {
@@ -136,6 +190,23 @@ hello!
             { value: 'id0', xpath: '/list/li[@id="id0"]/@id' },
             { value: '1st', xpath: '/list/li[@id="id0"]' },
         ]);
+        expect(fromxpath([
+            { value: '4th', xpath: '/list/li[@id="id3"]' },
+            { value: 'id3', xpath: '/list/li[@id="id3"]/@id' },
+            { value: 'a', xpath: '/list/li[@id="id3"]/@key' },
+            { value: 'id2', xpath: '/list/li[@id="id2"]/@id' },
+            { value: '3rd', xpath: '/list/li[@id="id2"]' },
+            { value: 'id1', xpath: '/list/li[@id="id1"]/@id' },
+            { value: '2nd', xpath: '/list/li[@id="id1"]' },
+            { value: 'id0', xpath: '/list/li[@id="id0"]/@id' },
+            { value: '1st', xpath: '/list/li[@id="id0"]' },
+        ], {
+            // attribute generated by autofilter will be omitted
+            autofilter: {
+                spec: 'id',
+                id: compile('id${index}'),
+            }
+        })).toEqual('<list><li>1st</li><li>2nd</li><li>3rd</li><li key="a">4th</li></list>');
     });
 
     it('single value from single entry', () => {
